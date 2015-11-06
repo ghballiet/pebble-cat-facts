@@ -1,60 +1,35 @@
-/**
- * Welcome to Pebble.js!
- *
- * This is where you write your app.
- */
-
 var UI = require('ui');
-var Vector2 = require('vector2');
+var ajax = require('ajax');
 
-var main = new UI.Card({
-  title: 'Pebble.js',
-  icon: 'images/menu_icon.png',
-  subtitle: 'Hello World!',
-  body: 'Press any button.'
+// show a loading screen while we fetch some data
+
+var loading = new UI.Card({
+  title: 'Cat Facts!',
+  body: 'Fetching new cat fact, one sec...'
 });
 
-main.show();
+loading.show();
 
-main.on('click', 'up', function(e) {
-  var menu = new UI.Menu({
-    sections: [{
-      items: [{
-        title: 'Pebble.js',
-        icon: 'images/menu_icon.png',
-        subtitle: 'Can do Menus'
-      }, {
-        title: 'Second Item',
-        subtitle: 'Subtitle Text'
-      }]
-    }]
-  });
-  menu.on('select', function(e) {
-    console.log('Selected item #' + e.itemIndex + ' of section #' + e.sectionIndex);
-    console.log('The item is titled "' + e.item.title + '"');
-  });
-  menu.show();
-});
+// make the ajax call for cat facts
 
-main.on('click', 'select', function(e) {
-  var wind = new UI.Window({
-    fullscreen: true,
-  });
-  var textfield = new UI.Text({
-    position: new Vector2(0, 65),
-    size: new Vector2(144, 30),
-    font: 'gothic-24-bold',
-    text: 'Text Anywhere!',
-    textAlign: 'center'
-  });
-  wind.add(textfield);
-  wind.show();
-});
-
-main.on('click', 'down', function(e) {
-  var card = new UI.Card();
-  card.title('A Card');
-  card.subtitle('Is a Window');
-  card.body('The simplest window type in Pebble.js.');
-  card.show();
-});
+ajax(
+  {
+    url: 'http://catfacts-api.appspot.com/api/facts?number=1',
+    type: 'json'
+  },
+  function(data, status, request) {
+    var fact = data.facts[0];
+    var card = new UI.Card({
+      title: 'Cat Fact!',
+      body: fact
+    });
+    card.show();
+  }, 
+  function(error, status, request) {
+    var card = new UI.Card({
+      title: ':(',
+      body: 'Something went horribly wrong.'
+    });
+    card.show();
+  }
+);
